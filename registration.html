@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --success-color: #16a34a;
+            --error-color: #dc2626;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            background: #f1f5f9;
+        }
+
+        .registration-container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .registration-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+
+        .form-title {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-label.required::after {
+            content: "*";
+            color: var(--error-color);
+            margin-left: 4px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .success-message {
+            color: var(--success-color);
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .submit-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .registration-container {
+                padding: 1rem;
+            }
+            
+            .registration-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="registration-container">
+        <div class="registration-card">
+            <h1 class="form-title">Create Account</h1>
+            
+            <form id="registrationForm" novalidate>
+                <div class="row">
+                    <!-- First Name -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label required" for="firstName">First Name</label>
+                            <input type="text" class="form-control" id="firstName" required>
+                            <div class="error-message" id="firstNameError"></div>
+                        </div>
+                    </div>
+
+                    <!-- Last Name -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label required" for="lastName">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" required>
+                            <div class="error-message" id="lastNameError"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label class="form-label required" for="email">Email Address</label>
+                    <input type="email" class="form-control" id="email" required>
+                    <div class="error-message" id="emailError"></div>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label class="form-label required" for="password">Password</label>
+                    <input type="password" class="form-control" id="password" required 
+                           pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}">
+                    <div class="error-message" id="passwordError">
+                        Must contain at least 8 characters, one uppercase, one lowercase, and one number
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-btn">Register Now</button>
+                
+                <!-- Success Message -->
+                <div class="success-message" id="successMessage">
+                    Registration successful! Welcome aboard!
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Form Validation
+        const form = document.getElementById('registrationForm');
+        const fields = {
+            firstName: document.getElementById('firstName'),
+            lastName: document.getElementById('lastName'),
+            email: document.getElementById('email'),
+            password: document.getElementById('password')
+        };
+
+        // Error display elements
+        const errorMessages = {
+            firstName: document.getElementById('firstNameError'),
+            lastName: document.getElementById('lastNameError'),
+            email: document.getElementById('emailError'),
+            password: document.getElementById('passwordError')
+        };
+
+        // Existing emails for validation
+        const existingEmails = ["test@example.com", "user@example.com"]; // Example existing emails
+
+        // Validation functions
+        const validators = {
+            firstName: value => /^[a-zA-Z]+$/.test(value.trim()), // Only letters
+            lastName: value => /^[a-zA-Z]+$/.test(value.trim()), // Only letters
+            email: value => {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(value) && !existingEmails.includes(value);
+            },
+            password: value => /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/.test(value)
+        };
+
+        // Real-time validation
+        Object.keys(fields).forEach(field => {
+            fields[field].addEventListener('input', () => validateField(field));
+        });
+
+        function validateField(field) {
+            const isValid = validators[field](fields[field].value);
+            errorMessages[field].style.display = isValid ? 'none' : 'block';
+            errorMessages[field].textContent = getErrorMessage(field);
+            return isValid;
+        }
+
+        function getErrorMessage(field) {
+            switch (field) {
+                case 'firstName':
+                case 'lastName':
+                    return 'Only letters are allowed.';
+                case 'email':
+                    return fields.email.value.includes('@') ? 'Email is already taken.' : 'Email must contain "@"';
+                case 'password':
+                    return 'Password must contain at least 8 characters, one uppercase, one lowercase, and one number.';
+                default:
+                    return '';
+            }
+        }
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Validate all fields
+            const isValid = Object.keys(fields).every(field => validateField(field));
+
+            if (isValid) {
+                // Confirmation dialog
+                const confirmation = confirm(`Please confirm your details:\nFirst Name: ${fields.firstName.value}\nLast Name: ${fields.lastName.value}\nEmail: ${fields.email.value}\n\nAre these correct?`);
+                
+                if (confirmation) {
+                    // Simulate secure submission
+                    const formData = {
+                        firstName: sanitizeInput(fields.firstName.value),
+                        lastName: sanitizeInput(fields.lastName.value),
+                        email: sanitizeInput(fields.email.value),
+                        password: await hashPassword(fields.password.value) // Simulated hashing
+                    };
+
+                    // Show success message
+                    document.getElementById('successMessage').style.display = 'block';
+                    form.reset();
+                    
+                    // Here you would typically send formData to your backend
+                    console.log('Submitting:', formData);
+                }
+            }
+        });
+
+        // Security functions
+        function sanitizeInput(input) {
+            // Basic input sanitization
+            return input.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        async function hashPassword(password) {
+            // Simulated password hashing (use bcrypt in backend)
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hashBuffer))
+                      .map(b => b.toString(16).padStart(2, '0'))
+                      .join('');
+        }
+    </script>
+</body>
+</html>
